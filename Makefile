@@ -1,30 +1,17 @@
 CC=gcc
-CFLAGS=-Wall -g3 -D_FILE_OFFSET_BITS=64
-LDFLAGS=-lfuse -g3
+CFLAGS=-Wall -D_FILE_OFFSET_BITS=64
+LDFLAGS=-lfuse
+
+DEPS=efs_dir.h efs_file.h efs_fs.h efs_vol.h utils.h
+OBJ=efs_dir.o efs_file.o efs_fs.o efs_vol.o main.o utils.o
 
 all:	fuse-efs	
 
-main.o: efs_file.h efs_fs.h efs_vol.h utils.h main.c
-	$(CC) $(CFLAGS) -c main.c
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-utils.o: utils.h utils.c
-	$(CC) $(CFLAGS) -c utils.c
-
-efs_vol.o: efs_vol.h utils.h efs_vol.c
-	$(CC) $(CFLAGS) -c efs_vol.c
-
-efs_file.o: efs_file.h utils.h efs_file.c
-	$(CC) $(CFLAGS) -c efs_file.c
-
-efs_fs.o: efs_fs.h utils.h efs_fs.c
-	$(CC) $(CFLAGS) -c efs_fs.c
-
-efs_dir.o: efs_fs.h utils.h efs_dir.c
-	$(CC) $(CFLAGS) -c efs_dir.c
-
-fuse-efs: main.o utils.o efs_vol.o efs_fs.o efs_file.o efs_dir.o
-	$(CC) -o fuse-efs main.o utils.o efs_vol.o efs_fs.o efs_file.o efs_dir.o \
-	    $(LDFLAGS)
+fuse-efs: $(OBJ)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -f *.o fuse-efs 
+	rm -f $(OBJ) fuse-efs 
